@@ -1,22 +1,21 @@
-import {createSlice} from "@reduxjs/toolkit";
-import {addProduct, fetchProduct} from "../service/productService.js";
+import { createSlice } from "@reduxjs/toolkit";
+import { addProduct, fetchProduct } from "../service/productService.js";
 
-const initialState = () => ({
-        code: null,
-        data: null,
-        loading: false,
-        error: false
-});
+const initialState = {
+    code: null,
+    data: null,
+    loading: false,
+    error: false
+};
 
 const productSlice = createSlice({
     name: 'product',
     initialState,
-    reducers: {
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(fetchProduct.pending, (state) => {
-            state.loading = true;
+                state.loading = true;
             })
             .addCase(fetchProduct.fulfilled, (state, action) => {
                 state.loading = false;
@@ -36,8 +35,7 @@ const productSlice = createSlice({
             .addCase(addProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
-            }
-            )
+            });
     }
 });
 

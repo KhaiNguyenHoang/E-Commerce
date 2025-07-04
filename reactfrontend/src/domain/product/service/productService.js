@@ -1,14 +1,17 @@
-import {createAsyncThunk} from "@reduxjs/toolkit";
+
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchProduct = async () => createAsyncThunk('product/fetchProduct',
+export const fetchProduct = createAsyncThunk('product/fetchProduct',
     async () => {
-    let response = axios.get('http://localhost:8080/products/getAll');
-    return (await response).data;
-})
+        const response = await axios.get('http://localhost:8080/products/getAll');
+        return response.data;
+    }
+);
 
-export const addProduct = async (product) => createAsyncThunk('product/addProduct',
-    async () => {
-    let response = axios.post('http://localhost:8080/products/add', product);
-    return (await response).status;
-})
+export const addProduct = createAsyncThunk('product/addProduct',
+    async (product) => {
+        const response = await axios.post('http://localhost:8080/products/add', product);
+        return response.status;
+    }
+);

@@ -1,6 +1,6 @@
 export class Product {
     constructor(name, image, description, quantity, price, discount, specialPrice) {
-        this.productName = name;
+        this.name = name;
         this.image = image;
         this.description = description;
         this.quantity = quantity;
