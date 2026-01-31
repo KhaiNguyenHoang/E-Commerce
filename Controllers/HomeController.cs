@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using E_Commerce.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Controllers;
 
@@ -10,6 +10,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 
     public IActionResult Index()
     {
+        _logger.LogDebug("HomeController.Index()");
         return View();
     }
 

@@ -1,7 +1,15 @@
-﻿namespace E_Commerce.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class Role(string name, string description) : BaseModel
+namespace E_Commerce.Models;
+
+public class Role : BaseModel
 {
-    public string Name { get; set; } = name;
-    public string Description { get; set; } = description;
+    [Required]
+    [MaxLength(50)]
+    public required string Name { get; set; }
+
+    [MaxLength(200)]
+    public string? Description { get; set; }
+
+    public virtual ICollection<User> Users { get; set; } = [];
 }
