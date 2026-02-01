@@ -1,27 +1,44 @@
-using System.Diagnostics;
-using E_Commerce.Models;
+using E_Commerce.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Controllers;
 
-public class HomeController(ILogger<HomeController> logger) : Controller
+public class HomeController : BaseController
 {
-    private readonly ILogger<HomeController> _logger = logger;
+    private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
 
-    public IActionResult Index()
+    public HomeController(
+        IProductService productService,
+        ICategoryService categoryService)
     {
-        _logger.LogDebug("HomeController.Index()");
+        _productService = productService;
+        _categoryService = categoryService;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var categories = await _categoryService.GetAllAsync();
+        var featuredProducts = (await _productService.GetAllAsync())
+            .Where(p => p.IsFeatured && p.IsActive)
+            .Take(8)
+            .ToList();
+        var latestProducts = (await _productService.GetAllAsync())
+            .Where(p => p.IsActive)
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(8)
+            .ToList();
+
+        ViewBag.Categories = categories;
+        ViewBag.FeaturedProducts = featuredProducts;
+        ViewBag.LatestProducts = latestProducts;
+        
         return View();
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    public IActionResult About() => View();
+    
+    public IActionResult Contact() => View();
+    
+    public IActionResult Error() => View();
 }

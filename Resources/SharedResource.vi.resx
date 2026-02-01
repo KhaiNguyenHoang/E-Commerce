@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  
+  <!-- Navigation -->
+  <data name="Home" xml:space="preserve"><value>Trang chủ</value></data>
+  <data name="Products" xml:space="preserve"><value>Sản phẩm</value></data>
+  <data name="Categories" xml:space="preserve"><value>Danh mục</value></data>
+  <data name="Cart" xml:space="preserve"><value>Giỏ hàng</value></data>
+  <data name="Wishlist" xml:space="preserve"><value>Yêu thích</value></data>
+  <data name="Account" xml:space="preserve"><value>Tài khoản</value></data>
+  <data name="Login" xml:space="preserve"><value>Đăng nhập</value></data>
+  <data name="Register" xml:space="preserve"><value>Đăng ký</value></data>
+  <data name="Logout" xml:space="preserve"><value>Đăng xuất</value></data>
+  
+  <!-- Common -->
+  <data name="Search" xml:space="preserve"><value>Tìm kiếm</value></data>
+  <data name="Submit" xml:space="preserve"><value>Gửi</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Hủy</value></data>
+  <data name="Save" xml:space="preserve"><value>Lưu</value></data>
+  <data name="Delete" xml:space="preserve"><value>Xóa</value></data>
+  <data name="Edit" xml:space="preserve"><value>Sửa</value></data>
+  <data name="Add" xml:space="preserve"><value>Thêm</value></data>
+  <data name="View" xml:space="preserve"><value>Xem</value></data>
+  
+  <!-- Product -->
+  <data name="AddToCart" xml:space="preserve"><value>Thêm vào giỏ</value></data>
+  <data name="AddToWishlist" xml:space="preserve"><value>Thêm yêu thích</value></data>
+  <data name="OutOfStock" xml:space="preserve"><value>Hết hàng</value></data>
+  <data name="InStock" xml:space="preserve"><value>Còn hàng</value></data>
+  <data name="Price" xml:space="preserve"><value>Giá</value></data>
+  <data name="Quantity" xml:space="preserve"><value>Số lượng</value></data>
+  
+  <!-- Checkout -->
+  <data name="Checkout" xml:space="preserve"><value>Thanh toán</value></data>
+  <data name="PlaceOrder" xml:space="preserve"><value>Đặt hàng</value></data>
+  <data name="ShippingAddress" xml:space="preserve"><value>Địa chỉ giao hàng</value></data>
+  <data name="PaymentMethod" xml:space="preserve"><value>Phương thức thanh toán</value></data>
+</root>

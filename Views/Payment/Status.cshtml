@@ -1,0 +1,47 @@
+@model E_Commerce.Models.Order
+@{
+    ViewData["Title"] = "Payment Status";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow text-center">
+                <div class="card-body py-5">
+                    @if (Model.PaymentStatus == E_Commerce.Models.PaymentStatus.Paid)
+                    {
+                        <div class="mb-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size:5rem"></i>
+                        </div>
+                        <h2 class="text-success">Payment Successful!</h2>
+                    }
+                    else if (Model.PaymentStatus == E_Commerce.Models.PaymentStatus.Failed)
+                    {
+                        <div class="mb-4">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size:5rem"></i>
+                        </div>
+                        <h2 class="text-danger">Payment Failed</h2>
+                    }
+                    else
+                    {
+                        <div class="mb-4">
+                            <i class="bi bi-clock-fill text-warning" style="font-size:5rem"></i>
+                        </div>
+                        <h2 class="text-warning">Payment Pending</h2>
+                    }
+                    
+                    <p class="lead mb-4">Order #@Model.OrderNumber</p>
+                    <p class="h4 mb-4">Total: @Model.TotalAmount.ToString("C")</p>
+                    
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Order" asp-action="Details" asp-route-id="@Model.Id" 
+                           class="btn btn-primary btn-lg">View Order Details</a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

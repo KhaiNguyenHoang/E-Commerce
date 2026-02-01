@@ -1,0 +1,308 @@
+@{
+    ViewData["Title"] = "Checkout";
+    var cart = ViewBag.Cart as E_Commerce.Models.Cart;
+    var total = (decimal)(ViewBag.Total ?? 0);
+    var addresses = ViewBag.Addresses as IEnumerable<E_Commerce.Models.Address>;
+    var defaultAddr = addresses?.FirstOrDefault(a => a.IsDefault);
+    var appliedCoupon = ViewBag.AppliedCoupon as E_Commerce.Models.Coupon;
+    var discount = (decimal)(ViewBag.Discount ?? 0);
+    var finalTotal = total - discount;
+}
+
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="h3 fw-bold mb-3">Checkout Securely</h1>
+        <div class="d-inline-flex align-items-center text-muted">
+            <span class="text-success fw-bold"><i class="bi bi-cart me-1"></i> Cart</span>
+            <i class="bi bi-chevron-right mx-3 small"></i>
+            <span class="text-primary fw-bold"><i class="bi bi-credit-card me-1"></i> Checkout</span>
+            <i class="bi bi-chevron-right mx-3 small"></i>
+            <span><i class="bi bi-check-circle me-1"></i> Confirmation</span>
+        </div>
+    </div>
+</div>
+
+<form asp-action="PlaceOrder" method="post" id="checkoutForm">
+    @Html.AntiForgeryToken()
+    <div class="row g-4 pb-5">
+        <div class="col-lg-8">
+            <!-- Shipping Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold text-primary">
+                        <i class="bi bi-geo-alt-fill me-2"></i>Shipping Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (addresses != null && addresses.Any())
+                    {
+                        <div class="mb-4 bg-light p-3 rounded border">
+                            <label class="form-label fw-bold mb-2">Saved Addresses</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-bookmarks"></i></span>
+                                <select id="addressSelect" class="form-select border-start-0" onchange="fillAddress()">
+                                    <option value="">-- Choose a saved address --</option>
+                                    @foreach (var addr in addresses)
+                                    {
+                                        <option value="@addr.Id"
+                                                data-name="@addr.RecipientName"
+                                                data-phone="@addr.PhoneNumber"
+                                                data-address="@addr.StreetAddress, @addr.Ward, @addr.District, @addr.City"
+                                                selected="@(addr.IsDefault ? "selected" : null)">
+                                            @addr.RecipientName — @addr.StreetAddress
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" id="shippingName" name="shippingName" class="form-control" placeholder="Full Name" required 
+                                       value="@defaultAddr?.RecipientName" />
+                                <label for="shippingName">Full Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" id="shippingPhone" name="shippingPhone" class="form-control" placeholder="Phone Number" required 
+                                       value="@defaultAddr?.PhoneNumber" />
+                                <label for="shippingPhone">Phone Number</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea id="shippingAddress" name="shippingAddress" class="form-control" placeholder="Address" style="height: 100px" required>@(defaultAddr != null ? $"{defaultAddr.StreetAddress}, {defaultAddr.Ward}, {defaultAddr.District}, {defaultAddr.City}" : "")</textarea>
+                                <label for="shippingAddress">Detailed Address (House No, Street, Ward, District, City)</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea name="note" class="form-control" placeholder="Note" style="height: 80px"></textarea>
+                                <label for="note">Order Notes (Optional - e.g. delivery instructions)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coupon Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-ticket-perforated-fill me-2 text-warning"></i>Coupons & Offers
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (appliedCoupon != null)
+                    {
+                        <div class="alert alert-success d-flex align-items-center justify-content-between border-0 shadow-sm">
+                            <div>
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                <span class="fw-bold">@appliedCoupon.Code</span> applied
+                                <span class="badge bg-success ms-2">
+                                    -@(appliedCoupon.DiscountType == E_Commerce.Models.DiscountType.Percentage ? $"{appliedCoupon.DiscountValue}%" : appliedCoupon.DiscountValue.ToString("C"))
+                                </span>
+                            </div>
+                            <a asp-action="RemoveCoupon" class="btn btn-sm btn-outline-danger bg-white">
+                                <i class="bi bi-trash"></i> Remove
+                            </a>
+                        </div>
+                        <input type="hidden" name="couponCode" value="@appliedCoupon.Code" />
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <input type="text" id="couponInput" class="form-control form-control-lg" placeholder="Enter coupon code" />
+                            <button type="button" class="btn btn-dark px-4" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <div id="couponMessage" class="mt-2"></div>
+                    }
+                </div>
+            </div>
+
+            <!-- Payment Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-credit-card-2-front-fill me-2 text-info"></i>Payment Method
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="card h-100 border-2 cursor-pointer radio-card selected-radio payment-option" onclick="selectPayment(this)">
+                                <div class="card-body p-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input visually-hidden" type="radio" name="paymentMethod" value="COD" id="cod" checked>
+                                        <div class="text-center">
+                                            <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                                <i class="bi bi-cash-stack fs-1 text-success"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-2">Cash on Delivery</h5>
+                                            <p class="text-muted mb-0 small">Pay when you receive your order</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="card h-100 border-2 cursor-pointer radio-card payment-option" onclick="selectPayment(this)">
+                                <div class="card-body p-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input visually-hidden" type="radio" name="paymentMethod" value="Stripe" id="stripe">
+                                        <div class="text-center">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                                <i class="bi bi-credit-card-2-front fs-1 text-primary"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-2">Credit / Debit Card</h5>
+                                            <p class="text-muted mb-0 small">Secure payment via Stripe</p>
+                                            <div class="mt-2">
+                                                <img src="https://cdn.jsdelivr.net/gh/ArtisticPhoenix/Asset_Vault/Images/visa-mastercard.png" alt="Cards" height="20" class="opacity-75">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 90px; z-index: 10;">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-bag-check me-2"></i>Your Order</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="order-items mb-4" style="max-height: 300px; overflow-y: auto;">
+                        @if (cart?.CartItems != null)
+                        {
+                            @foreach (var item in cart.CartItems)
+                            {
+                                <div class="d-flex mb-3 align-items-center">
+                                    <div class="position-relative me-3">
+                                        @if (!string.IsNullOrEmpty(item.Product?.MainImageUrl)) {
+                                            <img src="@item.Product.MainImageUrl" class="rounded border" width="60" height="60" style="object-fit: cover;" />
+                                        } else {
+                                            <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        }
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary icon-link-hover">
+                                            @item.Quantity
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 small text-truncate" style="max-width: 150px;">@item.Product?.Name</h6>
+                                        <small class="text-muted">@item.ProductVariant?.Size / @item.ProductVariant?.Color</small>
+                                    </div>
+                                    <div class="text-end fw-bold small">
+                                        @((item.UnitPrice * item.Quantity).ToString("C"))
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0 text-muted">
+                            <span>Subtotal</span>
+                            <span>@total.ToString("C")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0 text-muted">
+                            <span>Shipping</span>
+                            <span class="text-success">Free</span>
+                        </li>
+                        @if (discount > 0)
+                        {
+                            <li class="list-group-item d-flex justify-content-between bg-transparent px-0 text-success">
+                                <span>Discount</span>
+                                <span>-@discount.ToString("C")</span>
+                            </li>
+                        }
+                        <li class="list-group-item d-flex justify-content-between bg-transparent px-0 fw-bold fs-5 border-top-2 text-dark mt-2 pt-3">
+                            <span>Total</span>
+                            <span class="text-primary">@finalTotal.ToString("C")</span>
+                        </li>
+                    </ul>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-pill shadow-sm hover-lift">
+                        Place Order
+                    </button>
+                    
+                    <div class="text-center mt-3 text-muted small">
+                        <i class="bi bi-shield-lock me-1"></i> Your data is processed securely
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+.radio-card {
+    transition: all 0.2s ease;
+}
+.radio-card:hover {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+}
+.selected-radio {
+    border-color: var(--primary) !important;
+    background-color: #eff6ff !important;
+    position: relative;
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+.selected-radio::after {
+    content: '\F26E'; /* bi-check-circle-fill */
+    font-family: 'bootstrap-icons';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    color: var(--primary);
+    background: white;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+</style>
+
+@section Scripts {
+<script>
+    function selectPayment(element) {
+        // Remove style from all
+        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected-radio'));
+        
+        // Check radio
+        element.querySelector('input[type="radio"]').checked = true;
+        
+        // Add style to selected
+        element.classList.add('selected-radio');
+    }
+
+    function fillAddress() {
+        var select = document.getElementById('addressSelect');
+        var option = select.options[select.selectedIndex];
+        if (option.value) {
+            document.getElementById('shippingName').value = option.dataset.name;
+            document.getElementById('shippingPhone').value = option.dataset.phone;
+            document.getElementById('shippingAddress').value = option.dataset.address;
+        }
+    }
+
+    function applyCoupon() {
+        var code = document.getElementById('couponInput').value.trim();
+        if (!code) {
+            document.getElementById('couponMessage').innerHTML = 
+                '<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i> Please enter a coupon code</div>';
+            return;
+        }
+        
+        window.location.href = '/Order/ApplyCoupon?code=' + encodeURIComponent(code);
+    }
+</script>
+}

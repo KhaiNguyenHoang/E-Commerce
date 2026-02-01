@@ -26,6 +26,7 @@ namespace E_Commerce.Repositories
         {
             return await _context.Orders
                 .Include(o => o.User)
+                .Include(o => o.Coupon)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.OrderItems)

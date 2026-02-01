@@ -1,0 +1,130 @@
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = "_AdminLayout";
+    var categories = ViewBag.Categories as IEnumerable<E_Commerce.Models.Category>;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-bag-plus me-2"></i>Add Product</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Product Name *</label>
+                                <input type="text" name="Name" class="form-control" required maxlength="200" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">SKU</label>
+                                <input type="text" name="SKU" class="form-control" maxlength="50" placeholder="e.g. SN-001" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand *</label>
+                                <input type="text" name="Brand" class="form-control" required maxlength="100" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category *</label>
+                                <select name="CategoryId" class="form-select" required>
+                                    <option value="">Select category</option>
+                                    @if (categories != null)
+                                    {
+                                        @foreach (var cat in categories)
+                                        {
+                                            <option value="@cat.Id">@cat.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Price *</label>
+                                <div class="input-group">
+                                    <input type="number" name="Price" class="form-control" required min="0" step="1000" />
+                                    <span class="input-group-text">₫</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Discount Price</label>
+                                <div class="input-group">
+                                    <input type="number" name="DiscountPrice" class="form-control" min="0" step="1000" />
+                                    <span class="input-group-text">₫</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="Description" class="form-control" rows="3" maxlength="2000"></textarea>
+                        </div>
+
+                        <!-- Image Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header py-2">
+                                <i class="bi bi-image me-2"></i>Product Image
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#uploadTab">Upload File</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#urlTab">Image URL</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content pt-3">
+                                    <div class="tab-pane active" id="uploadTab">
+                                        <input type="file" name="imageFile" class="form-control" 
+                                               accept="image/jpeg,image/png,image/gif,image/webp" />
+                                        <small class="text-muted">Max 5MB. Supported: JPG, PNG, GIF, WebP</small>
+                                    </div>
+                                    <div class="tab-pane" id="urlTab">
+                                        <input type="url" name="imageUrl" class="form-control" 
+                                               placeholder="https://example.com/image.jpg" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" name="IsActive" value="true" class="form-check-input" checked />
+                                    <label class="form-check-label">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" name="IsFeatured" value="true" class="form-check-input" />
+                                    <label class="form-check-label">Featured</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Create Product
+                            </button>
+                            <a asp-action="Manage" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

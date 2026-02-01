@@ -37,6 +37,15 @@ namespace E_Commerce.Repositories
                 .FirstOrDefaultAsync(a => a.UserId == userId);
         }
 
+        public async Task<IEnumerable<Address>> GetAllByUserIdAsync(int userId)
+        {
+            return await _dbContext.Addresses
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.IsDefault)
+                .ThenByDescending(a => a.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(Address address)
         {
             var addressToUpdate = await _dbContext.Addresses.FindAsync(address.Id)

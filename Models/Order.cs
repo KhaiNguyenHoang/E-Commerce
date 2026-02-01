@@ -25,11 +25,7 @@ public enum PaymentStatus
 public enum PaymentMethod
 {
     COD,
-    BankTransfer,
-    CreditCard,
-    EWallet,
-    Momo,
-    ZaloPay
+    Stripe
 }
 
 public class Order : BaseModel
@@ -75,7 +71,9 @@ public class Order : BaseModel
     public DateTime? DeliveredAt { get; set; }
 
     public int UserId { get; set; }
+    public int? CouponId { get; set; }
 
     public virtual User? User { get; set; }
+    public virtual Coupon? Coupon { get; set; }
     public virtual ICollection<OrderItem> OrderItems { get; set; } = [];
 }

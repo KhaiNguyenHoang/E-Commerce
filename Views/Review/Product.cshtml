@@ -1,0 +1,60 @@
+@model IEnumerable<E_Commerce.Models.Review>
+@{
+    ViewData["Title"] = "Product Reviews";
+    var avgRating = ViewBag.AverageRating as double? ?? 0;
+}
+
+<h2><i class="bi bi-star"></i> Product Reviews</h2>
+
+<div class="mb-4">
+    <span class="h4 text-warning">
+        @for (int i = 1; i <= 5; i++)
+        {
+            if (i <= avgRating)
+            {
+                <i class="bi bi-star-fill"></i>
+            }
+            else if (i - avgRating < 1)
+            {
+                <i class="bi bi-star-half"></i>
+            }
+            else
+            {
+                <i class="bi bi-star"></i>
+            }
+        }
+    </span>
+    <span class="text-muted">(@avgRating.ToString("F1") / 5.0)</span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No reviews yet for this product.</div>
+}
+else
+{
+    @foreach (var review in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>@review.User?.FullName</strong>
+                        <span class="text-warning ms-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i>
+                            }
+                        </span>
+                    </div>
+                    <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                </div>
+                <p class="mt-2 mb-0">@review.Comment</p>
+            </div>
+        </div>
+    }
+}
+
+<a asp-controller="Product" asp-action="Details" asp-route-id="@ViewBag.ProductId" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to Product
+</a>

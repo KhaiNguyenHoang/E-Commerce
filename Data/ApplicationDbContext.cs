@@ -19,6 +19,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Coupon> Coupons { get; set; }
+    public DbSet<CouponUsage> CouponUsages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -185,5 +187,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             new Category { Id = 6, Name = "Sports Shoes", Description = "Athletic shoes for various sports", IsActive = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
             new Category { Id = 7, Name = "Loafers", Description = "Classic slip-on loafers", IsActive = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         );
+
+        // Note: Admin and Staff users are seeded via scripts/seed-users.sql
     }
 }

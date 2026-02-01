@@ -1,0 +1,79 @@
+@model E_Commerce.Models.User
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Avatar Section -->
+                        <div class="text-center mb-4">
+                            <img src="@(Model?.AvatarUrl ?? "/images/default-avatar.png")" 
+                                 alt="Avatar" class="rounded-circle mb-3" 
+                                 style="width:120px;height:120px;object-fit:cover;border:3px solid #dee2e6;">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" name="fullName" value="@Model?.FullName" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phoneNumber" value="@Model?.PhoneNumber" class="form-control" 
+                                   placeholder="e.g. 0912345678" />
+                        </div>
+
+                        <!-- Avatar Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header py-2">
+                                <i class="bi bi-person-circle me-2"></i>Avatar
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#uploadTab">Upload File</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#urlTab">Image URL</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content pt-3">
+                                    <div class="tab-pane active" id="uploadTab">
+                                        <input type="file" name="avatarFile" class="form-control" 
+                                               accept="image/jpeg,image/png,image/gif,image/webp" />
+                                        <small class="text-muted">Max 5MB. Supported: JPG, PNG, GIF, WebP</small>
+                                    </div>
+                                    <div class="tab-pane" id="urlTab">
+                                        <input type="url" name="avatarUrl" class="form-control" 
+                                               value="@Model?.AvatarUrl" placeholder="https://example.com/avatar.jpg" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

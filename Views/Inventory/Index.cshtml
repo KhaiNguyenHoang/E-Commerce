@@ -1,0 +1,84 @@
+@model IEnumerable<E_Commerce.Models.ProductVariant>
+@{
+    ViewData["Title"] = "Inventory";
+    Layout = "_AdminLayout";
+    var threshold = ViewBag.Threshold ?? 10;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-boxes me-2"></i>Inventory - Low Stock Items</h2>
+        <form method="get" class="d-flex gap-2">
+            <input type="number" name="threshold" value="@threshold" class="form-control" style="width:100px" />
+            <button type="submit" class="btn btn-outline-primary">Filter</button>
+        </form>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Product</th>
+                        <th>Variant</th>
+                        <th>Current Stock</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var variant in Model)
+                    {
+                        <tr class="@(variant.StockQuantity == 0 ? "table-danger" : variant.StockQuantity <= 5 ? "table-warning" : "")">
+                            <td>
+                                <strong>@variant.Product?.Name</strong>
+                                <small class="d-block text-muted">SKU: @variant.VariantSKU</small>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(variant.Size))
+                                {
+                                    <span class="badge bg-secondary">@variant.Size</span>
+                                }
+                                @if (!string.IsNullOrEmpty(variant.Color))
+                                {
+                                    <span class="badge bg-info">@variant.Color</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="fw-bold @(variant.StockQuantity == 0 ? "text-danger" : variant.StockQuantity <= 5 ? "text-warning" : "text-success")">
+                                    @variant.StockQuantity
+                                </span>
+                            </td>
+                            <td>@variant.Product?.Price.ToString("C")</td>
+                            <td>
+                                <form asp-action="UpdateStock" method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="variantId" value="@variant.Id" />
+                                    <input type="number" name="quantity" value="@variant.StockQuantity" 
+                                           class="form-control form-control-sm" style="width:80px" min="0" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-success">
+                                <i class="bi bi-check-circle fs-4"></i>
+                                <p class="mb-0">All items above threshold of @threshold</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

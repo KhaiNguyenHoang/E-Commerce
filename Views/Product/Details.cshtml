@@ -1,0 +1,298 @@
+@model E_Commerce.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    var variants = ViewBag.Variants as IEnumerable<E_Commerce.Models.ProductVariant>;
+    var images = ViewBag.Images as IEnumerable<E_Commerce.Models.ProductImage>;
+    var reviews = ViewBag.Reviews as IEnumerable<E_Commerce.Models.Review>;
+}
+@inject E_Commerce.Services.IAuthService AuthService
+
+<nav aria-label="breadcrumb" class="bg-light py-3 mb-4">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="row g-5">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <div class="product-gallery position-relative">
+                <div class="main-image mb-3 rounded-3 overflow-hidden shadow-sm border bg-white">
+                    @if (!string.IsNullOrEmpty(Model.MainImageUrl))
+                    {
+                        <img src="@Model.MainImageUrl" id="mainImage" class="img-fluid w-100" style="object-fit: contain; max-height: 500px;" alt="@Model.Name" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10" style="height: 400px;">
+                            <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                        </div>
+                    }
+                </div>
+                
+                @if (images != null && images.Any())
+                {
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <img src="@Model.MainImageUrl" class="img-thumbnail cursor-pointer active-thumb" onclick="changeImage(this.src)" style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;" />
+                        </div>
+                        @foreach (var img in images.Take(3))
+                        {
+                            <div class="col-3">
+                                <img src="@img.ImageUrl" class="img-thumbnail cursor-pointer" onclick="changeImage(this.src)" style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;" alt="@img.AltText" />
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <div class="ps-lg-3">
+                <div class="mb-2">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                        @Model.Category?.Name
+                    </span>
+                    @if(Model.IsFeatured) {
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill ms-2">Featured</span>
+                    }
+                </div>
+                
+                <h1 class="display-6 fw-bold mb-3">@Model.Name</h1>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <h2 class="text-primary mb-0 fw-bold me-3">@Model.Price.ToString("C")</h2>
+                    @if (Model.DiscountPrice.HasValue)
+                    {
+                        <span class="text-muted text-decoration-line-through fs-5">@Model.DiscountPrice.Value.ToString("C")</span>
+                        <span class="badge bg-danger ms-2">Sale</span>
+                    }
+                </div>
+                
+                <p class="text-muted mb-4 lead" style="font-size: 1rem;">@Model.Description</p>
+                
+                <div class="mb-4">
+                    <div class="row g-3 text-muted small">
+                        <div class="col-6">
+                            <i class="bi bi-upc-scan me-2"></i>SKU: <span class="text-dark fw-medium">@Model.SKU</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-tag me-2"></i>Brand: <span class="text-dark fw-medium">@Model.Brand</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-check-circle me-2"></i>Availability: 
+                            <span class="text-success fw-medium">In Stock</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <form asp-controller="Cart" asp-action="Add" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    
+                    @if (variants != null && variants.Any())
+                    {
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Option:</label>
+                            <select name="variantId" class="form-select form-select-lg border-2">
+                                @foreach (var v in variants.Where(v => v.IsAvailable))
+                                {
+                                    <option value="@v.Id">@v.Size / @v.Color</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    
+                    <div class="row align-items-end g-3 mb-4">
+                        <div class="col-4 col-sm-3">
+                            <label class="form-label fw-bold">Quantity</label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="decrementQty()">-</button>
+                                <input type="number" name="quantity" id="quantityInput" value="1" min="1" max="10" class="form-control text-center fs-5" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="incrementQty()">+</button>
+                            </div>
+                        </div>
+                        <div class="col-8 col-sm-9">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-2">
+                                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="d-flex gap-3">
+                    <form asp-controller="Wishlist" asp-action="Add" method="post" class="flex-grow-1">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-heart me-2"></i> Add to Wishlist
+                        </button>
+                    </form>
+                    <a href="#" class="btn btn-outline-secondary flex-grow-1">
+                        <i class="bi bi-share me-2"></i> Share
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active fw-bold" data-bs-toggle="tab" href="#description">Description</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold" data-bs-toggle="tab" href="#reviews">
+                                Reviews <span class="badge bg-secondary rounded-pill ms-1">View</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-4">
+                    <div class="tab-content">
+                        <!-- Description Tab -->
+                        <div class="tab-pane fade show active" id="description">
+                            <h5 class="mb-3">Product Description</h5>
+                            <p>@Model.Description</p>
+                            
+                            <div class="mt-4">
+                                <h6>Product Features</h6>
+                                <ul class="list-unstyled mt-2">
+                                    <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Premium quality materials</li>
+                                    <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Designed for comfort and durability</li>
+                                    <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i> Modern and stylish aesthetic</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0">Customer Reviews (@(reviews?.Count() ?? 0))</h5>
+                            </div>
+                            
+                            @if (ViewBag.CanReview == true)
+                            {
+                                <div class="card bg-light border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold mb-3">Write a Review</h6>
+                                        <form asp-controller="Review" asp-action="Create" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@Model.Id" />
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Rating</label>
+                                                <div class="rating-input">
+                                                    @for(int i = 5; i >= 1; i--)
+                                                    {
+                                                        <input type="radio" name="rating" value="@i" id="star @i" class="d-none" required />
+                                                        <label for="star @i" class="cursor-pointer text-warning fs-4 me-1" onclick="document.getElementsByName('rating')[0].value=@i">
+                                                            <i class="bi bi-star"></i>
+                                                        </label>
+                                                    }
+                                                </div>
+                                                <select name="rating" class="form-select w-auto mt-2" required>
+                                                    <option value="">Select Rating</option>
+                                                    <option value="5">5 Stars - Excellent</option>
+                                                    <option value="4">4 Stars - Good</option>
+                                                    <option value="3">3 Stars - Average</option>
+                                                    <option value="2">2 Stars - Poor</option>
+                                                    <option value="1">1 Star - Terrible</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Your Review</label>
+                                                <textarea name="comment" class="form-control" rows="3" placeholder="What did you like or dislike?" required></textarea>
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                            else if (await AuthService.GetCurrentUserAsync() == null)
+                            {
+                                <div class="alert alert-info">
+                                    Please <a asp-controller="Auth" asp-action="Login">login</a> and purchase this product to leave a review.
+                                </div>
+                            }
+
+                            @if (reviews != null && reviews.Any())
+                            {
+                                <div class="review-list">
+                                    @foreach (var review in reviews)
+                                    {
+                                        <div class="review-item border-bottom pb-3 mb-3">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                        <span class="fw-bold text-secondary">@review.User?.FullName?.Substring(0, 1)</span>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 fw-bold">@review.User?.FullName</h6>
+                                                        <div class="text-warning small">
+                                                            @for(int i = 1; i <= 5; i++)
+                                                            {
+                                                                if(i <= review.Rating) { <i class="bi bi-star-fill"></i> }
+                                                                else { <i class="bi bi-star"></i> }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                            </div>
+                                            <p class="mb-1">@review.Comment</p>
+                                            <div class="text-success small">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Verified Purchase
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 bg-light rounded">
+                                    <i class="bi bi-chat-quote text-muted mb-2" style="font-size: 2rem;"></i>
+                                    <p class="text-muted mb-0">No reviews yet. Be the first to review this product!</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeImage(src) {
+            document.getElementById('mainImage').src = src;
+        }
+        
+        function incrementQty() {
+            var input = document.getElementById('quantityInput');
+            var val = parseInt(input.value);
+            if (val < 10) input.value = val + 1;
+        }
+        
+        function decrementQty() {
+            var input = document.getElementById('quantityInput');
+            var val = parseInt(input.value);
+            if (val > 1) input.value = val - 1;
+        }
+    </script>
+}

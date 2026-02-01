@@ -1,0 +1,82 @@
+@model IEnumerable<E_Commerce.Models.Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<h2><i class="bi bi-bag"></i> My Orders</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You haven't placed any orders yet.
+        <a asp-controller="Product" asp-action="Index">Start shopping</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.OrderByDescending(o => o.CreatedAt))
+                {
+                    <tr>
+                        <td><code>@order.OrderNumber</code></td>
+                        <td>@order.CreatedAt.ToString("g")</td>
+                        <td>
+                            @switch (order.Status)
+                            {
+                                case E_Commerce.Models.OrderStatus.Pending:
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    break;
+                                case E_Commerce.Models.OrderStatus.Confirmed:
+                                    <span class="badge bg-info">Confirmed</span>
+                                    break;
+                                case E_Commerce.Models.OrderStatus.Processing:
+                                    <span class="badge bg-primary">Processing</span>
+                                    break;
+                                case E_Commerce.Models.OrderStatus.Shipped:
+                                    <span class="badge bg-secondary">Shipped</span>
+                                    break;
+                                case E_Commerce.Models.OrderStatus.Delivered:
+                                    <span class="badge bg-success">Delivered</span>
+                                    break;
+                                case E_Commerce.Models.OrderStatus.Cancelled:
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">@order.Status</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @if (order.PaymentStatus == E_Commerce.Models.PaymentStatus.Paid)
+                            {
+                                <span class="text-success"><i class="bi bi-check-circle"></i> Paid</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">@order.PaymentStatus</span>
+                            }
+                        </td>
+                        <td class="fw-bold">@order.TotalAmount.ToString("C")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

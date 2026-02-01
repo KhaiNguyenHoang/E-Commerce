@@ -1,0 +1,58 @@
+@model E_Commerce.Models.Wishlist
+@{
+    ViewData["Title"] = "Wishlist";
+}
+
+<h2><i class="bi bi-heart"></i> My Wishlist</h2>
+
+@if (Model?.WishlistItems == null || !Model.WishlistItems.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Your wishlist is empty.
+        <a asp-controller="Product" asp-action="Index">Browse products</a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        @foreach (var item in Model.WishlistItems)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(item.Product?.MainImageUrl))
+                    {
+                        <img src="@item.Product.MainImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h6 class="card-title">@item.Product?.Name</h6>
+                        <p class="card-text fw-bold text-primary">@item.Product?.Price.ToString("C")</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex gap-2">
+                            <form asp-action="MoveToCart" method="post" class="flex-grow-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </button>
+                            </form>
+                            <form asp-action="Remove" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

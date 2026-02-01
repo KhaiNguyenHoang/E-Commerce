@@ -26,7 +26,7 @@ public class Product : BaseModel
     [MaxLength(50)]
     public string? SKU { get; set; }
 
-    [MaxLength(255)]
+    [MaxLength(500)]
     public string? MainImageUrl { get; set; }
 
     public bool IsActive { get; set; } = true;

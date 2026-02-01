@@ -1,0 +1,268 @@
+@model E_Commerce.Models.Order
+@{
+    ViewData["Title"] = "Order " + Model.OrderNumber;
+    var isStaffOrAdmin = ViewBag.IsStaffOrAdmin ?? false;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 bg-transparent p-0">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">My Orders</a></li>
+            <li class="breadcrumb-item active">View Order</li>
+        </ol>
+    </nav>
+    <span class="text-muted small">Order placed on @Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Order Header -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h4 class="mb-1 fw-bold">Order #@Model.OrderNumber</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-clock text-muted"></i>
+                            <span class="text-muted">@Model.CreatedAt.ToString("h:mm tt")</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                         @switch (Model.Status)
+                        {
+                            case E_Commerce.Models.OrderStatus.Pending:
+                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Pending</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Confirmed:
+                                <span class="badge bg-info text-white px-3 py-2 rounded-pill">Confirmed</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Processing:
+                                <span class="badge bg-primary px-3 py-2 rounded-pill">Processing</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Shipped:
+                                <span class="badge bg-purple px-3 py-2 rounded-pill" style="background-color: #8b5cf6;">Shipped</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Delivered:
+                                <span class="badge bg-success px-3 py-2 rounded-pill">Delivered</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Cancelled:
+                                <span class="badge bg-danger px-3 py-2 rounded-pill">Cancelled</span>
+                                break;
+                            case E_Commerce.Models.OrderStatus.Refunded:
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill">Refunded</span>
+                                break;
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Items -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-bag-check me-2"></i>Order Items</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-3">Product</th>
+                                <th>Price</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end pe-4">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-box-seam text-secondary"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <h6 class="mb-1 text-dark">@item.ProductName</h6>
+                                                <small class="text-muted">
+                                                    @item.Size / @item.Color
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@item.UnitPrice.ToString("C")</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end pe-4 fw-bold">@item.TotalPrice.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td colspan="3" class="text-end py-3 text-muted">Subtotal</td>
+                                <td class="text-end pe-4 py-3 fw-bold">@Model.SubTotal.ToString("C")</td>
+                            </tr>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <tr class="text-success">
+                                    <td colspan="3" class="text-end py-2">Discount @(Model.Coupon != null ? $"({Model.Coupon.Code})" : "")</td>
+                                    <td class="text-end pe-4 py-2">-@Model.DiscountAmount.ToString("C")</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="3" class="text-end py-2 text-muted">Shipping</td>
+                                <td class="text-end pe-4 py-2 text-success">Free</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end py-3 fw-bold fs-5">Total</td>
+                                <td class="text-end pe-4 py-3 fw-bold fs-5 text-primary">@Model.TotalAmount.ToString("C")</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        @if (Model.Status == E_Commerce.Models.OrderStatus.Pending)
+        {
+            <div class="text-end">
+                <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this order? This action cannot be undone.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i> Cancel Order
+                    </button>
+                </form>
+            </div>
+        }
+
+        <!-- Staff/Admin Area -->
+        @if (isStaffOrAdmin)
+        {
+            <div class="card border-0 shadow-sm mt-5 border-start border-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-10 border-bottom-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-shield-lock me-2"></i>Admin Controls</h5>
+                </div>
+                <div class="card-body bg-warning bg-opacity-10">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Order Status</label>
+                            <form asp-action="UpdateStatus" method="post" class="d-flex gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <select name="status" class="form-select border-0 shadow-sm">
+                                    @foreach (E_Commerce.Models.OrderStatus status in Enum.GetValues(typeof(E_Commerce.Models.OrderStatus)))
+                                    {
+                                        <option value="@status" selected="@(status == Model.Status)">@status</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-dark shadow-sm">Update</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Payment Status</label>
+                            <form asp-action="UpdatePaymentStatus" method="post" class="d-flex gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <select name="status" class="form-select border-0 shadow-sm">
+                                    @foreach (E_Commerce.Models.PaymentStatus pstatus in Enum.GetValues(typeof(E_Commerce.Models.PaymentStatus)))
+                                    {
+                                        <option value="@pstatus" selected="@(pstatus == Model.PaymentStatus)">@pstatus</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-success shadow-sm">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Shipping Info -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-truck me-2"></i>Delivery</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="bg-light rounded-circle p-2">
+                            <i class="bi bi-person text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <span class="d-block small text-muted text-uppercase fw-bold">Receiver</span>
+                        <span class="fw-bold">@Model.ShippingName</span>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="bg-light rounded-circle p-2">
+                            <i class="bi bi-telephone text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <span class="d-block small text-muted text-uppercase fw-bold">Phone</span>
+                        <span>@Model.ShippingPhone</span>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="bg-light rounded-circle p-2">
+                            <i class="bi bi-geo-alt text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <span class="d-block small text-muted text-uppercase fw-bold">Address</span>
+                        <span>@Model.ShippingAddress</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Info -->
+        <div class="card border-0 shadow-sm mb-4">
+             <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2"></i>Payment</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="d-block small text-muted text-uppercase fw-bold mb-1">Method</span>
+                    <span class="fw-bold">@Model.PaymentMethod</span>
+                </div>
+                 <div>
+                    <span class="d-block small text-muted text-uppercase fw-bold mb-1">Status</span>
+                     @if (Model.PaymentStatus == E_Commerce.Models.PaymentStatus.Paid)
+                    {
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                    }
+                    else if (Model.PaymentStatus == E_Commerce.Models.PaymentStatus.Failed)
+                    {
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                    }
+                    else if (Model.PaymentStatus == E_Commerce.Models.PaymentStatus.Refunded)
+                    {
+                        <span class="badge bg-secondary"><i class="bi bi-arrow-return-left me-1"></i>Refunded</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-sticky me-2"></i>Order Note</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 fst-italic text-muted">"@Model.Note"</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

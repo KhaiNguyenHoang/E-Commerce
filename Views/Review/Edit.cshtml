@@ -1,0 +1,111 @@
+@model E_Commerce.Models.Review
+@{
+    ViewData["Title"] = "Edit Review";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Review" asp-action="MyReviews">My Reviews</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Review</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Edit Review</h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="@Model.Product?.MainImageUrl" alt="@Model.Product?.Name" 
+                             class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                        <div>
+                            <h6 class="mb-1">@Model.Product?.Name</h6>
+                            <small class="text-muted">Purchased on @Model.CreatedAt.ToString("MMM dd, yyyy")</small>
+                        </div>
+                    </div>
+
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Rating</label>
+                            <div class="rating-input">
+                                @for(int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="rating" value="@i" id="edit-star-@i" class="d-none" @(Model.Rating == i ? "checked" : "") required />
+                                    <label for="edit-star-@i" class="cursor-pointer text-warning fs-3 me-1" onclick="document.getElementsByName('rating')[0].value=@i">
+                                        @if (Model.Rating >= i) { <i class="bi bi-star-fill"></i> }
+                                        else { <i class="bi bi-star"></i> }
+                                    </label>
+                                }
+                            </div>
+                            <div class="form-text">Click to change rating.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Your Review</label>
+                            <textarea name="comment" class="form-control" rows="5" required>@Model.Comment</textarea>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-action="MyReviews" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple star rating interaction
+        const stars = document.querySelectorAll('.rating-input label i');
+        const inputs = document.querySelectorAll('.rating-input input');
+        
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const val = parseInt(this.value);
+                // Reset all stars
+                stars.forEach(s => s.classList.replace('bi-star-fill', 'bi-star'));
+                
+                // Fill stars up to selected value (reverse order due to HTML structure)
+                // Actually, due to reversed loop in HTML, we need to be careful.
+                // Simpler: just reload page or use pure CSS. 
+                // Let's use pure CSS logic usually, provided by the input check.
+                // But for visual update:
+                 updateStars(val);
+            });
+        });
+
+        function updateStars(rating) {
+            // Logic to update star icons dynamically based on selection if needed
+             const labels = document.querySelectorAll('.rating-input label');
+             labels.forEach(label => {
+                 const starVal = parseInt(label.getAttribute('for').split('-')[2]);
+                 const icon = label.querySelector('i');
+                 if (starVal <= rating) {
+                     icon.classList.remove('bi-star');
+                     icon.classList.add('bi-star-fill');
+                 } else {
+                     icon.classList.remove('bi-star-fill');
+                     icon.classList.add('bi-star');
+                 }
+             });
+        }
+    </script>
+}

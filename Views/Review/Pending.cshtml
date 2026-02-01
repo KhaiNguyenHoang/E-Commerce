@@ -1,0 +1,51 @@
+@model IEnumerable<E_Commerce.Models.Review>
+@{
+    ViewData["Title"] = "Pending Reviews";
+}
+
+<h2><i class="bi bi-clock"></i> Pending Reviews</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-success">No pending reviews!</div>
+}
+else
+{
+    @foreach (var review in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>@review.Product?.Name</h5>
+                        <div class="mb-2">
+                            <strong>@review.User?.FullName</strong>
+                            <span class="text-warning ms-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i>
+                                }
+                            </span>
+                            <small class="text-muted ms-2">@review.CreatedAt.ToString("g")</small>
+                        </div>
+                        <p class="mb-0">@review.Comment</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <form asp-action="Approve" asp-route-id="@review.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check"></i> Approve
+                            </button>
+                        </form>
+                        <form asp-action="Reject" asp-route-id="@review.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x"></i> Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

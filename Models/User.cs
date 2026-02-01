@@ -27,6 +27,10 @@ public class User : BaseModel
 
     public DateTime? LastLoginAt { get; set; }
 
+    [MaxLength(255)]
+    public string? ResetPasswordToken { get; set; }
+    public DateTime? ResetPasswordTokenExpiry { get; set; }
+
     public int RoleId { get; set; }
 
     public virtual Role? Role { get; set; }

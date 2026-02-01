@@ -1,0 +1,104 @@
+@model E_Commerce.Models.Coupon?
+@{
+    ViewData["Title"] = Model == null ? "Create Coupon" : "Edit Coupon";
+    var isEdit = Model != null;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated me-2"></i>@ViewData["Title"]
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                        @if (isEdit)
+                        {
+                            <input type="hidden" name="Id" value="@Model!.Id" />
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Coupon Code *</label>
+                            <input type="text" name="Code" class="form-control text-uppercase" 
+                                   value="@Model?.Code" required maxlength="50" 
+                                   placeholder="e.g. SUMMER20" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="Description" class="form-control" 
+                                   value="@Model?.Description" maxlength="200" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Discount Type *</label>
+                                <select name="DiscountType" class="form-select" required>
+                                    <option value="0" selected="@(Model?.DiscountType == E_Commerce.Models.DiscountType.Percentage)">Percentage (%)</option>
+                                    <option value="1" selected="@(Model?.DiscountType == E_Commerce.Models.DiscountType.FixedAmount)">Fixed Amount (₫)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Discount Value *</label>
+                                <input type="number" name="DiscountValue" class="form-control" 
+                                       value="@Model?.DiscountValue" required min="0.01" step="0.01" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Minimum Order Amount</label>
+                                <input type="number" name="MinimumOrderAmount" class="form-control" 
+                                       value="@Model?.MinimumOrderAmount" min="0" step="1000" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Maximum Discount</label>
+                                <input type="number" name="MaximumDiscountAmount" class="form-control" 
+                                       value="@Model?.MaximumDiscountAmount" min="0" step="1000" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="datetime-local" name="StartDate" class="form-control" 
+                                       value="@Model?.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="datetime-local" name="EndDate" class="form-control" 
+                                       value="@Model?.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Usage Limit</label>
+                                <input type="number" name="UsageLimit" class="form-control" 
+                                       value="@Model?.UsageLimit" min="1" placeholder="Unlimited" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input type="checkbox" name="IsActive" value="true" class="form-check-input" 
+                                           checked="@(Model?.IsActive ?? true)" />
+                                    <label class="form-check-label">Active</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>@(isEdit ? "Update" : "Create") Coupon
+                            </button>
+                            <a asp-action="Manage" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="row min-vh-75 align-items-center justify-content-center py-5">
+    <div class="col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="row g-0">
+                <div class="col-12">
+                    <div class="bg-success p-4 text-center text-white" 
+                         style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="bi bi-person-plus-fill" style="font-size: 3rem; opacity: 0.8;"></i>
+                        <h2 class="fw-bold mt-2 text-white">Join ShoeStore</h2>
+                        <p class="mb-0 text-white-50">Create your account to start shopping</p>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="card-body p-4 p-md-5">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger d-flex align-items-center mb-4">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                <div>@ViewBag.Error</div>
+                            </div>
+                        }
+                        
+                        <form method="post">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        <input type="text" name="fullName" class="form-control" id="nameInput" placeholder="John Doe" required>
+                                        <label for="nameInput">Full Name</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email" name="email" class="form-control" id="emailInput" placeholder="name@example.com" required>
+                                        <label for="emailInput">Email</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="tel" name="phoneNumber" class="form-control" id="phoneInput" placeholder="Phone Number">
+                                        <label for="phoneInput">Phone Number</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="password" name="password" class="form-control" id="passwordInput" placeholder="Password" required minlength="6">
+                                        <label for="passwordInput">Password</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="password" name="confirmPassword" class="form-control" id="confirmInput" placeholder="Confirm Password" required>
+                                        <label for="confirmInput">Confirm Password</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mt-3 mb-4">
+                                <input class="form-check-input" type="checkbox" required id="termsCheck">
+                                <label class="form-check-label text-muted small" for="termsCheck">
+                                    I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-lg"></i> Create Account
+                                </button>
+                            </div>
+                            
+                            <div class="text-center text-muted">
+                                <p class="mb-0">
+                                    Already have an account? 
+                                    <a asp-action="Login" class="text-decoration-none fw-bold">Sign in instead</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

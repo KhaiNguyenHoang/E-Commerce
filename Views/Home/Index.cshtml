@@ -1,9 +1,286 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
-    ViewData["Message"] = "Your application description page.";
+    ViewData["Title"] = "Premium Footwear Store";
+    var categories = ViewBag.Categories as IEnumerable<E_Commerce.Models.Category>;
+    var featuredProducts = ViewBag.FeaturedProducts as IEnumerable<E_Commerce.Models.Product>;
+    var latestProducts = ViewBag.LatestProducts as IEnumerable<E_Commerce.Models.Product>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero position-relative overflow-hidden mb-5" 
+         style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #7c3aed 100%);">
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block" 
+         style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22rgba(255,255,255,0.1)%22/></svg>') no-repeat center; background-size: cover;"></div>
+    <div class="container position-relative py-5">
+        <div class="row align-items-center py-4">
+            <div class="col-lg-7">
+                <span class="badge bg-warning text-dark mb-3 px-3 py-2">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>New Collection 2026
+                </span>
+                <h1 class="display-3 fw-bold text-white mb-3" style="line-height: 1.1;">
+                    Step Into <br>
+                    <span class="text-warning">Style & Comfort</span>
+                </h1>
+                <p class="lead text-white-50 mb-4 pe-lg-5">
+                    Discover our curated collection of premium footwear designed for the modern lifestyle. 
+                    Quality craftsmanship meets contemporary design.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg px-4">
+                        <i class="bi bi-bag me-2"></i>Shop Now
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-featured="true" 
+                       class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-star me-2"></i>Featured
+                    </a>
+                </div>
+                <!-- Trust badges -->
+                <div class="d-flex gap-4 mt-5 text-white-50">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-truck fs-4 me-2"></i>
+                        <small>Free Shipping</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check fs-4 me-2"></i>
+                        <small>Secure Payment</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-repeat fs-4 me-2"></i>
+                        <small>Easy Returns</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <div class="position-relative">
+                    <div class="bg-white bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                         style="width: 350px; height: 350px;">
+                        <i class="bi bi-box-seam text-white" style="font-size: 10rem; opacity: 0.8;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+@if (categories != null && categories.Any())
+{
+    <section class="container mb-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Shop by Category</h2>
+            <p class="text-muted">Find the perfect pair for every occasion</p>
+        </div>
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-7 g-3">
+            @foreach (var cat in categories.Where(c => c.IsActive).Take(7))
+            {
+                <div class="col">
+                    <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@cat.Id" 
+                       class="card text-center text-decoration-none h-100 border-0 hover-lift">
+                        <div class="card-body py-4">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 60px; height: 60px;">
+                                <i class="bi bi-tag fs-4 text-primary"></i>
+                            </div>
+                            <h6 class="card-title mb-0 fw-semibold">@cat.Name</h6>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Featured Products -->
+@if (featuredProducts != null && featuredProducts.Any())
+{
+    <section class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-star-fill text-warning me-2"></i>Featured Products
+                </h2>
+                <p class="text-muted mb-0">Handpicked favorites just for you</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var product in featuredProducts)
+            {
+                <div class="col">
+                    <div class="card product-card h-100 border-0">
+                        <div class="position-relative overflow-hidden" style="height: 220px;">
+                            @if (!string.IsNullOrEmpty(product.MainImageUrl))
+                            {
+                                <img src="@product.MainImageUrl" class="card-img-top h-100" 
+                                     style="object-fit: cover;" alt="@product.Name" />
+                            }
+                            else
+                            {
+                                <div class="h-100 bg-gradient d-flex align-items-center justify-content-center"
+                                     style="background: linear-gradient(135deg, #f3f4f6, #e5e7eb);">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            <span class="badge-discount"><i class="bi bi-star-fill me-1"></i>Featured</span>
+                            <!-- Quick actions -->
+                            <div class="quick-actions">
+                                <a asp-controller="Wishlist" asp-action="Add" asp-route-id="@product.Id" 
+                                   class="btn" title="Add to Wishlist"><i class="bi bi-heart"></i></a>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" 
+                                   class="btn" title="Quick View"><i class="bi bi-eye"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">@product.Category?.Name</p>
+                            <h6 class="product-title">@product.Name</h6>
+                            <div class="d-flex align-items-center justify-content-between mt-3">
+                                <span class="product-price">@product.Price.ToString("C")</span>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-bag-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Promo Banner -->
+<section class="container mb-5">
+    <div class="card border-0 overflow-hidden" 
+         style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-danger mb-2">Limited Time Offer</span>
+                    <h3 class="text-white fw-bold mb-2">Get 20% Off Your First Order</h3>
+                    <p class="text-white-50 mb-3">Use code <span class="text-warning fw-bold">WELCOME20</span> at checkout</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg">
+                        Shop Now <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Products -->
+@if (latestProducts != null && latestProducts.Any())
+{
+    <section class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-lightning-fill text-success me-2"></i>New Arrivals
+                </h2>
+                <p class="text-muted mb-0">Fresh styles just landed</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var product in latestProducts)
+            {
+                <div class="col">
+                    <div class="card product-card h-100 border-0">
+                        <div class="position-relative overflow-hidden" style="height: 220px;">
+                            @if (!string.IsNullOrEmpty(product.MainImageUrl))
+                            {
+                                <img src="@product.MainImageUrl" class="card-img-top h-100" 
+                                     style="object-fit: cover;" alt="@product.Name" />
+                            }
+                            else
+                            {
+                                <div class="h-100 bg-gradient d-flex align-items-center justify-content-center"
+                                     style="background: linear-gradient(135deg, #f3f4f6, #e5e7eb);">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            <span class="badge-new">New</span>
+                            <div class="quick-actions">
+                                <a asp-controller="Wishlist" asp-action="Add" asp-route-id="@product.Id" 
+                                   class="btn" title="Add to Wishlist"><i class="bi bi-heart"></i></a>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" 
+                                   class="btn" title="Quick View"><i class="bi bi-eye"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-1">@product.Category?.Name</p>
+                            <h6 class="product-title">@product.Name</h6>
+                            <div class="d-flex align-items-center justify-content-between mt-3">
+                                <span class="product-price">@product.Price.ToString("C")</span>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-bag-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Features Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 h-100 text-center bg-transparent">
+                    <div class="card-body">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 70px; height: 70px;">
+                            <i class="bi bi-truck fs-3 text-primary"></i>
+                        </div>
+                        <h5 class="fw-semibold">Free Shipping</h5>
+                        <p class="text-muted mb-0 small">On orders over $100</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 h-100 text-center bg-transparent">
+                    <div class="card-body">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 70px; height: 70px;">
+                            <i class="bi bi-shield-check fs-3 text-success"></i>
+                        </div>
+                        <h5 class="fw-semibold">Secure Payment</h5>
+                        <p class="text-muted mb-0 small">100% secure checkout</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 h-100 text-center bg-transparent">
+                    <div class="card-body">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 70px; height: 70px;">
+                            <i class="bi bi-arrow-counterclockwise fs-3 text-warning"></i>
+                        </div>
+                        <h5 class="fw-semibold">Easy Returns</h5>
+                        <p class="text-muted mb-0 small">30-day return policy</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 h-100 text-center bg-transparent">
+                    <div class="card-body">
+                        <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 70px; height: 70px;">
+                            <i class="bi bi-headset fs-3 text-info"></i>
+                        </div>
+                        <h5 class="fw-semibold">24/7 Support</h5>
+                        <p class="text-muted mb-0 small">Dedicated customer service</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
